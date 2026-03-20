@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>МНР — Нумерация команд и программ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f9f9f7; color: #1a1a1a; padding: 2rem; }
+  h1 { font-size: 20px; font-weight: 600; margin-bottom: 0.25rem; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 2rem; }
+  .section { margin-bottom: 2.5rem; }
+  h2 { font-size: 15px; font-weight: 600; margin-bottom: 8px; border-bottom: 1px solid #e0e0d8; padding-bottom: 6px; }
+  table { border-collapse: collapse; font-size: 12px; max-width: 100%; overflow-x: auto; display: block; white-space: nowrap; }
+  th { background: #f0efe8; color: #555; font-weight: 600; padding: 5px 9px; border: 1px solid #ddd; text-align: center; }
+  td { padding: 4px 9px; border: 1px solid #e8e8e0; text-align: center; color: #1a1a1a; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  tr:hover td { background: #eef3fb; }
+  .note { font-size: 12px; color: #666; margin-bottom: 8px; padding: 7px 10px; background: #f0efe8; border-radius: 6px; line-height: 1.5; }
+  .search-area { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 1.25rem; margin-bottom: 2.5rem; }
+  .search-area h2 { border-bottom-color: #ddd; }
+  .search-row { display: flex; gap: 10px; align-items: center; margin: 10px 0; flex-wrap: wrap; }
+  input[type=number] { width: 90px; padding: 6px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; }
+  button { padding: 6px 16px; background: #1a1a1a; color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
+  button:hover { background: #333; }
+  #result-box { font-size: 13px; padding: 7px 12px; background: #f0efe8; border-radius: 6px; color: #1a1a1a; flex: 1; min-width: 200px; }
+  #program-detail { font-size: 13px; color: #444; line-height: 1.7; margin-top: 8px; padding: 8px 12px; background: #f7f6f0; border-radius: 6px; min-height: 20px; }
+  .cmd-chip { display: inline-block; background: #e8f0fb; border: 1px solid #b5d0f0; border-radius: 4px; padding: 1px 7px; font-family: monospace; font-size: 11px; margin: 2px; color: #1a4a80; }
+  .type-tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 5px; border-radius: 3px; margin-left: 4px; vertical-align: middle; }
+  .tz { background: #fde; color: #900; }
+  .ts { background: #dfd; color: #060; }
+  .tt { background: #def; color: #069; }
+  .tj { background: #fed; color: #960; }
+  @media (max-width: 600px) { body { padding: 1rem; } }
+</style>
+</head>
+<body>
+
+<h1>МНР — Машина с Неограниченными Регистрами</h1>
+<p class="subtitle">Справочник по нумерации команд и программ (лекция 28.02)</p>
+
+<div class="search-area">
+  <h2>🔍 Найти программу P<sub>N</sub> по номеру</h2>
+  <div class="search-row">
+    <label style="font-size:13px;color:#555">Номер N:</label>
+    <input type="number" id="prog-num" min="1" max="300" value="33" oninput="findProgram()">
+    <div id="result-box">Введите номер выше</div>
+  </div>
+  <div id="program-detail"></div>
+</div>
+
+<div class="section">
+  <h2>Таблица 4 — нумерация всех команд МНР (обозначение L<sub>i</sub>)</h2>
+  <div class="note">Команды идут блоками по 4: Z(k), S(k), T<sub>k</sub>, J<sub>k</sub> — для k = 1, 2, 3, ...
+  Где T<sub>k</sub> = T(n,m) — k-я строка Таблицы 2; J<sub>k</sub> = J(n,m,r) — k-я строка Таблицы 3.</div>
+  <table id="table4"></table>
+</div>
+
+<div class="section">
+  <h2>Таблица 1 — нумерация строк из ℤ<sub>≥0</sub>, обозначение L<sub>i</sub></h2>
+  <div class="note">Строки упорядочены: сначала по сумме компонент (весу), внутри одного веса — лексикографически. Все компоненты ≥ 1. Это и есть нумерация программ: строка (i<sub>1</sub>,...,i<sub>d</sub>) задаёт программу P<sub>r</sub>, и её команды — L<sub>i<sub>1</sub></sub>, ..., L<sub>i<sub>d</sub></sub>.</div>
+  <table id="table1"></table>
+</div>
+
+<div class="section">
+  <h2>Таблица 2 — строки длины 2, обозначение m<sub>i</sub> (для команды T)</h2>
+  <div class="note">T(n,m) = T<sub>i</sub>, где i — номер строки (n,m) в этой таблице.</div>
+  <table id="table2"></table>
+</div>
+
+<div class="section">
+  <h2>Таблица 3 — строки длины 3, обозначение q<sub>i</sub> (для команды J)</h2>
+  <div class="note">J(n,m,r) = J<sub>i</sub>, где i — номер строки (n,m,r) в этой таблице.</div>
+  <table id="table3"></table>
+</div>
+
+<div class="section">
+  <h2>Справка: команды МНР</h2>
+  <div class="note">
+    <span class="type-tag tz">Z(n)</span> — обнулить регистр R<sub>n</sub>: R<sub>n</sub> := 0<br>
+    <span class="type-tag ts">S(n)</span> — увеличить регистр R<sub>n</sub> на 1: R<sub>n</sub> := R<sub>n</sub> + 1<br>
+    <span class="type-tag tt">T(m,n)</span> — скопировать R<sub>m</sub> в R<sub>n</sub>: R<sub>n</sub> := R<sub>m</sub><br>
+    <span class="type-tag tj">J(m,n,q)</span> — условный переход: если R<sub>m</sub> = R<sub>n</sub>, перейти к команде L<sub>q</sub>; иначе к следующей. Если q > длины программы — остановиться.
+  </div>
+  <div class="note" style="margin-top:8px">
+    <b>Обозначения результата:</b><br>
+    P(a<sub>1</sub>,a<sub>2</sub>,...) ↓ — программа P останавливается при входе (a<sub>1</sub>,a<sub>2</sub>,...), результат = значение R<sub>1</sub><br>
+    P(a<sub>1</sub>,a<sub>2</sub>,...) ↑ — программа не останавливается<br>
+    f<sub>P</sub><sup>(k)</sup>(a<sub>1</sub>,...,a<sub>k</sub>) — результат выполнения P на k аргументах
+  </div>
+</div>
+
+<script>
+function genCompositions(remaining, minLen, maxLen, current, result) {
+  if (remaining === 0 && current.length >= minLen && current.length <= maxLen) {
+    result.push([...current]);
+    return;
+  }
+  if (remaining <= 0 || current.length >= maxLen) return;
+  for (let k = 1; k <= remaining; k++) {
+    current.push(k);
+    genCompositions(remaining - k, minLen, maxLen, current, result);
+    current.pop();
+  }
+}
+
+function allSeqs(maxW) {
+  const rows = [];
+  for (let w = 1; w <= maxW; w++) genCompositions(w, 1, w, [], rows);
+  return rows;
+}
+
+function rowStr(r) { return '(' + r.join(',') + ')'; }
+
+const seqs1 = allSeqs(10);
+
+const seqs2 = [];
+for (let w = 2; w <= 14; w++) genCompositions(w, 2, 2, [], seqs2);
+
+const seqs3 = [];
+for (let w = 3; w <= 12; w++) genCompositions(w, 3, 3, [], seqs3);
+
+function getCmd(i) {
+  const block = Math.ceil(i / 4);
+  const pos = (i - 1) % 4;
+  if (pos === 0) return { str: `Z(${block})`, type: 'tz' };
+  if (pos === 1) return { str: `S(${block})`, type: 'ts' };
+  if (pos === 2) {
+    if (block <= seqs2.length) return { str: `T(${seqs2[block-1][0]},${seqs2[block-1][1]})`, type: 'tt' };
+    return { str: `T_${block}`, type: 'tt' };
+  }
+  if (pos === 3) {
+    if (block <= seqs3.length) return { str: `J(${seqs3[block-1][0]},${seqs3[block-1][1]},${seqs3[block-1][2]})`, type: 'tj' };
+    return { str: `J_${block}`, type: 'tj' };
+  }
+}
+
+// Table 4
+(function() {
+  const t4 = document.getElementById('table4');
+  let h = '<tr><th>L<sub>i</sub></th>';
+  for (let i = 1; i <= 28; i++) h += `<th>${i}</th>`;
+  h += '</tr><tr><th>Команда</th>';
+  for (let i = 1; i <= 28; i++) {
+    const c = getCmd(i);
+    h += `<td><span class="type-tag ${c.type}">${c.str}</span></td>`;
+  }
+  h += '</tr>';
+  t4.innerHTML = h;
+})();
+
+// Table 1
+(function() {
+  const t = document.getElementById('table1');
+  const N = Math.min(seqs1.length, 60);
+  let h = '<tr><th>Номер</th>';
+  for (let i = 0; i < N; i++) h += `<th>${i+1}</th>`;
+  h += '</tr><tr><th>Строка</th>';
+  for (let i = 0; i < N; i++) h += `<td>${rowStr(seqs1[i])}</td>`;
+  h += '</tr>';
+  t.innerHTML = h;
+})();
+
+// Table 2
+(function() {
+  const t = document.getElementById('table2');
+  const N = Math.min(seqs2.length, 25);
+  let h = '<tr><th>m<sub>i</sub></th>';
+  for (let i = 0; i < N; i++) h += `<th>${i+1}</th>`;
+  h += '</tr><tr><th>Строка</th>';
+  for (let i = 0; i < N; i++) h += `<td>${rowStr(seqs2[i])}</td>`;
+  h += '</tr><tr><th>T(n,m)</th>';
+  for (let i = 0; i < N; i++) h += `<td>T(${seqs2[i][0]},${seqs2[i][1]})</td>`;
+  h += '</tr>';
+  t.innerHTML = h;
+})();
+
+// Table 3
+(function() {
+  const t = document.getElementById('table3');
+  const N = Math.min(seqs3.length, 20);
+  let h = '<tr><th>q<sub>i</sub></th>';
+  for (let i = 0; i < N; i++) h += `<th>${i+1}</th>`;
+  h += '</tr><tr><th>Строка</th>';
+  for (let i = 0; i < N; i++) h += `<td>${rowStr(seqs3[i])}</td>`;
+  h += '</tr><tr><th>J(n,m,r)</th>';
+  for (let i = 0; i < N; i++) h += `<td>J(${seqs3[i][0]},${seqs3[i][1]},${seqs3[i][2]})</td>`;
+  h += '</tr>';
+  t.innerHTML = h;
+})();
+
+// Program finder
+function findProgram() {
+  const n = parseInt(document.getElementById('prog-num').value);
+  if (!n || n < 1) return;
+  if (n > seqs1.length) {
+    document.getElementById('result-box').textContent = `P${n}: нет данных (слишком большой номер)`;
+    document.getElementById('program-detail').innerHTML = '';
+    return;
+  }
+  const row = seqs1[n - 1];
+  document.getElementById('result-box').innerHTML = `P<sub>${n}</sub>: строка <b>${rowStr(row)}</b> (${row.length} команд)`;
+
+  const cmdParts = row.map((ci, idx) => {
+    if (ci > 200) return `<span class="cmd-chip">L_${ci}=?</span>`;
+    const c = getCmd(ci);
+    return `<span class="cmd-chip" title="L_${idx+1}"><b>L<sub>${idx+1}</sub></b> = <span class="type-tag ${c.type}">${c.str}</span></span>`;
+  });
+
+  const actions = row.map((ci) => {
+    const c = getCmd(ci).str;
+    if (c.startsWith('Z')) return `обнулить R${c.match(/\d+/)[0]}`;
+    if (c.startsWith('S')) return `R${c.match(/\d+/)[0]} += 1`;
+    if (c.startsWith('T')) { const [a,b] = c.match(/\d+/g); return `R${b} := R${a}`; }
+    if (c.startsWith('J')) { const [a,b,q] = c.match(/\d+/g); return `если R${a}=R${b} → L_${q}`; }
+    return c;
+  });
+
+  document.getElementById('program-detail').innerHTML =
+    `<div style="margin-bottom:6px">${cmdParts.join(' ')}</div>` +
+    `<div style="color:#555"><b>Последовательность действий:</b> ${actions.join(' → ')}</div>`;
+}
+
+findProgram();
+</script>
+</body>
+</html>
